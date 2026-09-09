@@ -66,8 +66,8 @@ O projeto já conta com [vercel.json](file:///Users/phelipesc/Documents/projetos
 
 1. **Importar o repositório na Vercel**: Conecte o repositório `ph2708/auto_cold`.
 2. **Integrar o Neon Database**: Conecte a integração Neon na Vercel (injeta `POSTGRES_URL` / `DATABASE_URL` automaticamente).
-3. **Variáveis de Ambiente**:
-   - `APP_KEY`: `base64:T2ZnXLrdHiGLfj/Wr2B3CbyA38prUFErQZ/iNLsSdts=`
+3. **Variáveis de Ambiente na Vercel**:
+   - `APP_KEY`: Gere uma chave segura com `php artisan key:generate --show` ou use a chave da sua aplicação.
 4. **Executar Migrations no Neon**:
 ```bash
 DATABASE_URL="sua_connection_string_neon" php artisan migrate --force
