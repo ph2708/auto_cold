@@ -21,55 +21,6 @@ Route::get('/site', function () {
 })->name('landing');
 
 
-// Rota de Diagnóstico do Banco Neon / Vercel
-Route::get('/health-db', function () {
-    try {
-        $db = \Illuminate\Support\Facades\DB::connection()->getPdo();
-        $dbName = \Illuminate\Support\Facades\DB::connection()->getDatabaseName();
-        $driver = \Illuminate\Support\Facades\DB::connection()->getDriverName();
-        $tables = \Illuminate\Support\Facades\DB::select("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
-        $tablesList = array_map(fn($t) => $t->table_name ?? $t->TABLE_NAME, $tables);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Conexão com Banco de Dados OK!',
-            'driver' => $driver,
-            'database' => $dbName,
-            'tables_count' => count($tablesList),
-            'tables' => $tablesList,
-            'neon_env_detected' => !empty(env('DATABASE_URL') ?: env('POSTGRES_URL') ?: env('STORAGE_URL')),
-            'app_key_set' => !empty(config('app.key')),
-        ]);
-    } catch (\Throwable $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'app_key_set' => !empty(config('app.key')),
-            'env_database_url' => substr(env('DATABASE_URL') ?: env('POSTGRES_URL') ?: env('STORAGE_URL') ?: 'NÃO DEFINIDO', 0, 15) . '...',
-        ], 500);
-    }
-});
-
-// Rota rápida de auto-migração caso não tenha CLI local
-Route::get('/run-migrate', function () {
-    try {
-        \Illuminate\Support\Facades\Artisan::call('migrate --force');
-        \Illuminate\Support\Facades\Artisan::call('db:seed --force');
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Migrations e Seeders executados com sucesso!',
-            'output' => \Illuminate\Support\Facades\Artisan::output()
-        ]);
-    } catch (\Throwable $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage(),
-        ], 500);
-    }
-});
-
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
