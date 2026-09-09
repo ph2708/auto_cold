@@ -22,7 +22,7 @@ if (!file_exists('/tmp/bootstrap_cache')) {
 }
 
 // Suporte automático para Neon Postgres na Vercel (DATABASE_URL / POSTGRES_URL / STORAGE_URL)
-$databaseUrl = getenv('DATABASE_URL') ?: getenv('POSTGRES_URL') ?: getenv('STORAGE_URL');
+$databaseUrl = getenv('DATABASE_URL') ?: getenv('POSTGRES_URL') ?: getenv('STORAGE_URL') ?: getenv('POSTGRES_PRISMA_URL');
 if ($databaseUrl) {
     putenv('DB_CONNECTION=pgsql');
     putenv('DB_URL=' . $databaseUrl);
@@ -32,12 +32,9 @@ if ($databaseUrl) {
 
 // Manter arquivos em /tmp na Vercel
 putenv('APP_STORAGE=/tmp/storage');
-putenv('APP_SERVICES_CACHE=/tmp/bootstrap_cache/services.php');
-putenv('APP_PACKAGES_CACHE=/tmp/bootstrap_cache/packages.php');
-putenv('APP_CONFIG_CACHE=/tmp/bootstrap_cache/config.php');
-putenv('APP_ROUTES_CACHE=/tmp/bootstrap_cache/routes.php');
-putenv('APP_EVENTS_CACHE=/tmp/bootstrap_cache/events.php');
 putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
+putenv('SESSION_DRIVER=cookie');
+putenv('CACHE_STORE=array');
 
 require __DIR__.'/../vendor/autoload.php';
 
