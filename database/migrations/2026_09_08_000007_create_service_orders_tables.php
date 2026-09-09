@@ -46,12 +46,14 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Peças aplicadas na OS (Integradas ao estoque)
+        // Peças aplicadas na OS (Integradas ao estoque ou cotadas externamente)
         Schema::create('service_order_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('service_order_id')->constrained('service_orders')->cascadeOnDelete();
-            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
+            $table->foreignId('product_id')->nullable()->constrained('products')->nullOnDelete();
+            $table->string('item_name')->nullable();
             $table->decimal('quantity', 12, 2);
+            $table->string('unit')->default('UN');
             $table->decimal('unit_cost', 12, 2)->default(0);
             $table->decimal('unit_price', 12, 2)->default(0);
             $table->decimal('total_amount', 12, 2)->default(0);
