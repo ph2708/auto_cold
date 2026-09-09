@@ -1,6 +1,6 @@
 # 🚗 Auto Cold - Sistema de Gestão para Auto Elétrica & Ar Condicionado
 
-Sistema completo desenvolvido em **Laravel 12 (PHP 8.2+)**, preparado para execução via **Docker**, **VPS / Oracle Cloud** e **Vercel Serverless + Neon Postgres**.
+Sistema completo desenvolvido em **Laravel 12 (PHP 8.2+)**, otimizado para deploy serverless na **Vercel** com banco de dados em nuvem **Neon Postgres**.
 
 Projetado especificamente para oficinas automotivas com foco em **Auto Elétrica e Ar Condicionado** (**Auto Cold** / **Juliano Ribeiro**), com fluxo simplificado em 1 tela, rastreamento de peças encomendadas (Mercado Livre, Shopee), ordens de serviço, emissão de orçamentos e painel administrativo com personalização visual em tempo real.
 
@@ -43,35 +43,21 @@ Projetado especificamente para oficinas automotivas com foco em **Auto Elétrica
 
 ---
 
-## 🚀 Como Executar Localmente com Docker
+## ☁️ Deploy & Arquitetura na Vercel + Neon Postgres
 
-### 1. Iniciar os Contêineres
-```bash
-docker compose up -d
-```
+O projeto está 100% preparado para rodar em arquitetura serverless de alta performance:
+- [vercel.json](file:///Users/phelipesc/Documents/projetos/auto_cold/vercel.json): Configuração de rotas, assets e runtime serverless.
+- [api/index.php](file:///Users/phelipesc/Documents/projetos/auto_cold/api/index.php): Entrypoint adaptado com suporte a `/tmp` e detecção automática do Neon Database.
 
-### 2. Acessos aos Serviços
-- **Aplicação Web:** [http://localhost:8000](http://localhost:8000)
-- **phpMyAdmin (Banco de Dados):** [http://localhost:8088](http://localhost:8088)
-  - Servidor: `db`
-  - Usuário: `root`
-  - Senha: `root_secret`
-- **Porta MySQL Direta:** `localhost:3307` (banco: `auto_cold`, usuário: `auto_cold_user`, senha: `auto_cold_secret`)
-
----
-
-## ☁️ Deploy na Vercel com Neon Postgres
-
-O projeto já conta com [vercel.json](file:///Users/phelipesc/Documents/projetos/auto_cold/vercel.json) e o entrypoint serverless [api/index.php](file:///Users/phelipesc/Documents/projetos/auto_cold/api/index.php) configurados.
+### Passo a Passo de Instalação:
 
 1. **Importar o repositório na Vercel**: Conecte o repositório `ph2708/auto_cold`.
-2. **Integrar o Neon Database**: Conecte a integração Neon na Vercel (injeta `POSTGRES_URL` / `DATABASE_URL` automaticamente).
-3. **Variáveis de Ambiente na Vercel**:
-   - `APP_KEY`: Gere uma chave segura com `php artisan key:generate --show` ou use a chave da sua aplicação.
-4. **Executar Migrations no Neon**:
+2. **Integrar o Neon Database**: No dashboard da Vercel, adicione a integração Neon Postgres (injeta `POSTGRES_URL` / `DATABASE_URL` automaticamente).
+3. **Variáveis de Ambiente na Vercel (`Project Settings -> Environment Variables`)**:
+   - `APP_KEY`: Chave gerada para a aplicação (ex: `php artisan key:generate --show`).
+4. **Executar Migrations e Seeders no Neon**:
 ```bash
-DATABASE_URL="sua_connection_string_neon" php artisan migrate --force
-DATABASE_URL="sua_connection_string_neon" php artisan db:seed --force
+DATABASE_URL="sua_connection_string_neon" php artisan migrate:fresh --seed --force
 ```
 
 ---
@@ -88,7 +74,7 @@ DATABASE_URL="sua_connection_string_neon" php artisan db:seed --force
 
 ## 🧪 Testes Automatizados
 
-Para rodar a suíte completa de testes automatizados com PHPUnit:
+Para rodar a suíte completa de testes automatizados:
 ```bash
-docker compose exec app php artisan test
+php artisan test
 ```
