@@ -35,8 +35,8 @@ services:
     environment:
       MYSQL_DATABASE: auto_cold
       MYSQL_USER: auto_cold_user
-      MYSQL_PASSWORD: auto_cold_secret
-      MYSQL_ROOT_PASSWORD: root_secret
+      MYSQL_PASSWORD: "Ac#9vX2$kL8mP@4wTy7!Rz"
+      MYSQL_ROOT_PASSWORD: "Rt#8mQ4$uW1pZ@9eKx3!Vb"
     ports:
       - "3307:3306"
     volumes:
@@ -44,7 +44,7 @@ services:
     networks:
       - auto_cold_network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_secret"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pRt#8mQ4$uW1pZ@9eKx3!Vb"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -58,7 +58,7 @@ services:
     environment:
       PMA_HOST: db
       PMA_USER: root
-      PMA_PASSWORD: root_secret
+      PMA_PASSWORD: "Rt#8mQ4$uW1pZ@9eKx3!Vb"
     networks:
       - auto_cold_network
     depends_on:

@@ -62,12 +62,25 @@ class SettingController extends Controller
         // Upload de Logo Escuro (usado no Navbar escuro e Landing Page)
         if ($request->hasFile('logo_dark_file')) {
             $path = $request->file('logo_dark_file')->store('logos', 'public');
+            // Garantir cópia para diretório acessível em hospedagem compartilhada
+            try {
+                if (!file_exists(public_path('storage/logos'))) {
+                    @mkdir(public_path('storage/logos'), 0777, true);
+                }
+                @copy(storage_path('app/public/' . $path), public_path('storage/' . $path));
+            } catch (\Exception $e) {}
             Setting::set('logo_dark', 'storage/' . $path);
         }
 
         // Upload de Logo Claro (usado em impressões e fundos brancos)
         if ($request->hasFile('logo_light_file')) {
             $path = $request->file('logo_light_file')->store('logos', 'public');
+            try {
+                if (!file_exists(public_path('storage/logos'))) {
+                    @mkdir(public_path('storage/logos'), 0777, true);
+                }
+                @copy(storage_path('app/public/' . $path), public_path('storage/' . $path));
+            } catch (\Exception $e) {}
             Setting::set('logo_light', 'storage/' . $path);
         }
 

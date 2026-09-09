@@ -49,7 +49,7 @@
                         <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
                             <i class="fa-solid fa-user text-sm"></i>
                         </span>
-                        <input type="text" id="login" name="login" value="{{ old('login', 'admin') }}" required autofocus
+                        <input type="text" id="login" name="login" value="{{ old('login') }}" placeholder="Digite seu usuário ou e-mail" required autofocus
                             class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition">
                     </div>
                 </div>
@@ -60,7 +60,7 @@
                         <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
                             <i class="fa-solid fa-lock text-sm"></i>
                         </span>
-                        <input type="password" id="password" name="password" required value="admin123"
+                        <input type="password" id="password" name="password" placeholder="••••••••" required
                             class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition">
                     </div>
                 </div>
@@ -76,14 +76,6 @@
                     Acessar Sistema
                 </button>
             </form>
-
-            <!-- Credenciais de Teste / Atalho informativo -->
-            <div class="mt-6 pt-6 border-t border-slate-800 text-[11px] text-slate-400 space-y-1 bg-slate-950/40 p-3 rounded-lg">
-                <p class="font-bold text-slate-300 mb-1">🔑 Usuários de Demonstração:</p>
-                <p><span class="text-cyan-400 font-semibold">Admin:</span> admin | senha: admin123</p>
-                <p><span class="text-cyan-400 font-semibold">Eletricista:</span> carlos.eletrica | senha: eletrica123</p>
-                <p><span class="text-cyan-400 font-semibold">Estoquista:</span> marcos.estoque | senha: estoque123</p>
-            </div>
         </div>
     </div>
 
