@@ -1,8 +1,8 @@
 # 🚗 Auto Cold - Sistema de Gestão para Auto Elétrica & Ar Condicionado
 
-Sistema completo desenvolvido em **Laravel 12 (PHP 8.2+)**, otimizado para deploy serverless na **Vercel** com banco de dados em nuvem **Neon Postgres**.
+Sistema completo desenvolvido em **Laravel 12 (PHP 8.2+)** com banco de dados **MySQL 8.0** e armazenamento local permanente de fotos (`storage/app/public`), perfeito para deploy em hospedagens como **Hostinger** (cPanel / hPanel / VPS) ou servidores dedicados.
 
-Projetado especificamente para oficinas automotivas com foco em **Auto Elétrica e Ar Condicionado** (**Auto Cold** / **Juliano Ribeiro**), com fluxo simplificado em 1 tela, rastreamento de peças encomendadas (Mercado Livre, Shopee), ordens de serviço, emissão de orçamentos e painel administrativo com personalização visual em tempo real.
+Focado em oficinas automotivas (**Auto Cold** / **Juliano Ribeiro**), com fluxo simplificado em 1 tela, rastreamento de compras externas (Mercado Livre, Shopee), ordens de serviço, upload de fotos do veículo antes/durante/depois, emissão de orçamentos e painel administrativo com personalização visual em tempo real.
 
 ---
 
@@ -22,43 +22,64 @@ Projetado especificamente para oficinas automotivas com foco em **Auto Elétrica
 - **Botão 1-Clique "Cliente Avulso"**: Atendimento rápido de balcão sem burocracia.
 - **Alternador de Modo**: Criação com 1 clique de **Orçamento Prévio** ou **Ordem de Serviço (OS)** em execução.
 
-### 3. 🛒 Cotação em Tempo Real vs Peças do Estoque Físico
+### 3. 📸 Fotos do Veículo & Laudo Técnico
+- Upload de múltiplas fotos em alta resolução por etapa (**Antes da Manutenção**, **Diagnóstico na Bancada** e **Após Conclusão / Teste de Entrega**).
+- Armazenamento em disco local (`storage/app/public/os_photos`).
+
+### 4. 🛒 Cotação em Tempo Real vs Peças do Estoque Físico
 - **Cotação Externa (Lojas / Mercado Livre)**: Permite inserir itens cotados em tempo real no orçamento sem exigir cadastro prévio e sem descontar do estoque físico.
 - **Uso de Estoque Físico**: Baixa automática e atômica com Kardex quando uma peça do estoque da oficina é aplicada.
 - **Impressão Pronta**: Layout limpo e profissional para impressão e geração de PDF de Orçamento e Ordem de Serviço com valores detalhados e termos de garantia.
 
-### 4. 🚚 Rastreamento de Peças a Chegar (`/purchase_orders`)
+### 5. 🚚 Rastreamento de Peças a Chegar (`/purchase_orders`)
 - Controle de compras feitas na internet (Mercado Livre, Shopee, Distribuidoras).
 - Apenas digite a peça e o código de rastreio para acompanhar prazos e chegada na oficina.
 - Botão rápido de recebimento que incorpora o item ao estoque ou à OS correspondente.
 
-### 5. 👥 Clientes, CPF Opcional & Veículos (`/customers`)
+### 6. 👥 Clientes, CPF Opcional & Veículos (`/customers`)
 - Campo de CPF **opcional** com verificação em tempo real (AJAX) para alertar duplicidades sem travar novos cadastros.
 - Cadastro e histórico unificado por cliente e por placa.
 
-### 6. 📊 Painel Geral & Gestão Financeira (`/dashboard`)
+### 7. 📊 Painel Geral & Gestão Financeira (`/dashboard`)
 - Faturamento bruto e recebíveis em aberto.
 - Total investido em compras/encomendas no mês.
 - DRE e margem de ganho real da oficina (Mão de Obra 100% líquida + margem sobre peças).
 
 ---
 
-## ☁️ Deploy & Arquitetura na Vercel + Neon Postgres
+## 🚀 Como Fazer o Deploy na Hostinger
 
-O projeto está 100% preparado para rodar em arquitetura serverless de alta performance:
-- [vercel.json](file:///Users/phelipesc/Documents/projetos/auto_cold/vercel.json): Configuração de rotas, assets e runtime serverless.
-- [api/index.php](file:///Users/phelipesc/Documents/projetos/auto_cold/api/index.php): Entrypoint adaptado com suporte a `/tmp` e detecção automática do Neon Database.
+### 1. Criar o Banco de Dados MySQL
+1. No painel da Hostinger (hPanel / cPanel), acesse **Bancos de Dados MySQL**.
+2. Crie um novo banco (ex: `u123456_autocold`), usuário e senha.
 
-### Passo a Passo de Instalação:
+### 2. Configurar o `.env`
+No gerenciador de arquivos da Hostinger ou via SSH, configure o seu `.env`:
+```env
+APP_NAME="Auto Cold"
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://seudominio.com.br
 
-1. **Importar o repositório na Vercel**: Conecte o repositório `ph2708/auto_cold`.
-2. **Integrar o Neon Database**: No dashboard da Vercel, adicione a integração Neon Postgres (injeta `POSTGRES_URL` / `DATABASE_URL` automaticamente).
-3. **Variáveis de Ambiente na Vercel (`Project Settings -> Environment Variables`)**:
-   - `APP_KEY`: Chave gerada para a aplicação (ex: `php artisan key:generate --show`).
-4. **Executar Migrations e Seeders no Neon**:
-```bash
-DATABASE_URL="sua_connection_string_neon" php artisan migrate:fresh --seed --force
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=nome_do_banco_criado
+DB_USERNAME=usuario_do_banco
+DB_PASSWORD=senha_do_banco
 ```
+
+### 3. Comandos de Inicialização (SSH no Terminal da Hostinger):
+```bash
+composer install --optimize-autoloader --no-dev
+php artisan key:generate
+php artisan migrate --force
+php artisan db:seed --force
+php artisan storage:link
+chmod -R 775 storage bootstrap/cache
+```
+
+*(Caso use Hospedagem Compartilhada sem SSH, aponte a pasta raiz do domínio para a pasta `public/`).*
 
 ---
 
@@ -74,7 +95,7 @@ DATABASE_URL="sua_connection_string_neon" php artisan migrate:fresh --seed --for
 
 ## 🧪 Testes Automatizados
 
-Para rodar a suíte completa de testes automatizados:
+Para rodar a suíte completa de testes automatizados com PHPUnit:
 ```bash
 php artisan test
 ```
