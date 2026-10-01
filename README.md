@@ -36,14 +36,32 @@ Focado em oficinas automotivas (**Auto Cold** / **Juliano Ribeiro**), com fluxo 
 - Apenas digite a peça e o código de rastreio para acompanhar prazos e chegada na oficina.
 - Botão rápido de recebimento que incorpora o item ao estoque ou à OS correspondente.
 
-### 6. 👥 Clientes, CPF Opcional & Veículos (`/customers`)
+### 6. 👥 Clientes, CPF Opcional & Perfil Consolidado (`/customers`)
 - Campo de CPF **opcional** com verificação em tempo real (AJAX) para alertar duplicidades sem travar novos cadastros.
 - Cadastro e histórico unificado por cliente e por placa.
+- **Página de Perfil do Cliente (`/customers/{id}`)**: visualização detalhada com total investido, quantidade de atendimentos e listagem completa de todas as ordens de serviço e orçamentos vinculados.
 
 ### 7. 📊 Painel Geral & Gestão Financeira (`/dashboard`)
-- Faturamento bruto e recebíveis em aberto.
+- Faturamento bruto e recebíveis em aberto com consultas otimizadas no banco.
 - Total investido em compras/encomendas no mês.
 - DRE e margem de ganho real da oficina (Mão de Obra 100% líquida + margem sobre peças).
+
+### 8. 📈 Relatórios & Análises Gerenciais (`/reports`)
+- **Painel Financeiro & KPIs**: Ticket médio, faturamento consolidado e receita líquida.
+- **Gráfico Mensal de Receita**: Comparativo dos últimos 6 meses para acompanhamento de crescimento.
+- **Top Peças Mais Utilizadas**: Ranking de peças e produtos de maior giro.
+- **Clientes Mais Frequentes**: Listagem de clientes com maior volume de serviços realizados.
+- **Alertas de Reposição de Estoque**: Monitoramento proativo de produtos com estoque zerado ou abaixo do limite mínimo.
+
+### 9. 🕒 Auditoria & Timeline de Atividades na OS (`/service_orders/{id}`)
+- Rastreamento completo de eventos por Ordem de Serviço na tabela `service_order_logs`.
+- Registro automático de: criação, aprovação de orçamento, adição/remoção de peças e serviços, e alterações de status.
+- Timeline visual com identificação do usuário responsável, badges de status e data/hora de cada alteração.
+
+### 10. 🎨 Interface Moderna & Dark / Light Mode
+- Sistema de temas com alternância instantânea entre **Modo Escuro** e **Modo Claro** com persistência no navegador via `localStorage`.
+- Design profissional com tipografia Inter, glassmorphism sutil, badges de status intuitivos e microinterações.
+- Alertas visuais aprimorados e confirmações de segurança para ações destrutivas (exclusão de itens ou cancelamentos).
 
 ---
 
