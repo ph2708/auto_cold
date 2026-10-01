@@ -171,6 +171,13 @@ class PurchaseOrderController extends Controller
             }
         });
 
-        return back()->with('success', 'Peça conferida e recebida na oficina com sucesso! Entrada gerada no estoque.');
+        $message = 'Peça conferida e recebida na oficina com sucesso!';
+
+        // Aviso explícito se não havia produto vinculado (nenhuma entrada de estoque gerada)
+        if (!$purchaseOrder->fresh()->product_id) {
+            return back()->with('warning', $message . ' ⚠️ Nenhuma entrada de estoque foi gerada porque este pedido não está vinculado a uma peça do catálogo. Registre a entrada manualmente no Kardex se necessário.');
+        }
+
+        return back()->with('success', $message . ' Entrada gerada no Kardex automaticamente.');
     }
 }

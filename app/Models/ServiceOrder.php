@@ -77,6 +77,25 @@ class ServiceOrder extends Model
         return $this->hasMany(ServiceOrderPhoto::class);
     }
 
+    public function logs()
+    {
+        return $this->hasMany(ServiceOrderLog::class)->latest();
+    }
+
+    /**
+     * Registra uma entrada no histórico da OS
+     */
+    public function addLog(string $action, ?string $description = null, ?string $fromValue = null, ?string $toValue = null, ?int $userId = null): void
+    {
+        $this->logs()->create([
+            'user_id'     => $userId ?? \Illuminate\Support\Facades\Auth::id(),
+            'action'      => $action,
+            'from_value'  => $fromValue,
+            'to_value'    => $toValue,
+            'description' => $description,
+        ]);
+    }
+
     public function beforePhotos()
     {
         return $this->photos()->where('stage', 'before');

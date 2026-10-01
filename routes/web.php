@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ServiceOrderController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\ReportController;
 
 // Landing Page Pública da Auto Cold
 Route::get('/', function () {
@@ -30,6 +31,9 @@ Route::middleware(['auth'])->group(function () {
     
     // Dashboard (Todos os autenticados)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Relatórios & Análises
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
     // Catálogo de Produtos / Peças Elétricas
     Route::resource('products', ProductController::class);

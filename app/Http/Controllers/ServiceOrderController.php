@@ -170,6 +170,12 @@ class ServiceOrderController extends Controller
 
         $os = ServiceOrder::create($osData);
 
+        // Registro no histórico
+        $os->addLog(
+            'created',
+            'OS criada. Cliente: ' . $customer->name . ' | Veículo: ' . $cleanPlate . ' | Status inicial: ' . $os->status_label
+        );
+
         $msg = $os->status === 'budget' 
             ? 'Orçamento criado com sucesso! Adicione as peças e serviços para imprimir ou enviar.' 
             : 'Ordem de Serviço criada com sucesso!';
@@ -179,7 +185,7 @@ class ServiceOrderController extends Controller
 
     public function show(ServiceOrder $serviceOrder)
     {
-        $serviceOrder->load(['customer', 'vehicle', 'technician', 'items.product', 'services', 'purchaseOrders', 'photos.user']);
+        $serviceOrder->load(['customer', 'vehicle', 'technician', 'items.product', 'services', 'purchaseOrders', 'photos.user', 'logs.user']);
         $products = Product::where('is_active', true)->where('current_stock', '>', 0)->orderBy('name')->get();
         $technicians = User::where('is_active', true)->get();
 
@@ -236,12 +242,23 @@ class ServiceOrderController extends Controller
             'discount' => 'nullable|numeric|min:0',
         ]);
 
+        $oldStatus = $serviceOrder->status_label;
+
         if ($validated['status'] === 'completed' && empty($serviceOrder->completion_date)) {
             $serviceOrder->completion_date = now();
         }
 
         $serviceOrder->update($validated);
         $serviceOrder->recalculateTotals();
+
+        // Audit log
+        $newOs = $serviceOrder->fresh();
+        $serviceOrder->addLog(
+            'status_changed',
+            'Status alterado de "' . $oldStatus . '" para "' . $newOs->status_label . '"',
+            $oldStatus,
+            $newOs->status_label
+        );
 
         return back()->with('success', 'Status da OS atualizado com sucesso!');
     }
@@ -282,6 +299,11 @@ class ServiceOrderController extends Controller
             ]);
 
             $serviceOrder->recalculateTotals();
+
+            $serviceOrder->addLog(
+                'item_added',
+                "Peça/Item adicionado: {$itemName} — Qtd: {$quantity} × R$ " . number_format($unitPrice, 2, ',', '.')
+            );
 
             return back()->with('success', "Item \"{$itemName}\" inserido no orçamento/OS com sucesso!");
         }
@@ -326,6 +348,12 @@ class ServiceOrderController extends Controller
 
             $productLocked->decrement('current_stock', $quantity);
             $serviceOrder->recalculateTotals();
+
+            // Audit log
+            $serviceOrder->addLog(
+                'item_added',
+                "Peça aplicada do estoque: {$productLocked->name} — Qtd: {$quantity} × R$ " . number_format($unitPrice, 2, ',', '.') . " (Estoque baixado)"
+            );
         });
 
         return back()->with('success', "Peça {$product->name} adicionada à OS e baixada do estoque!");
@@ -356,6 +384,11 @@ class ServiceOrderController extends Controller
                     $product->increment('current_stock', $item->quantity);
                 }
             }
+
+            $serviceOrder->addLog(
+                'item_removed',
+                "Item removido: {$item->item_name} — Qtd: {$item->quantity}" . ($item->product_id ? ' (Estoque estornado)' : '')
+            );
 
             $item->delete();
             $serviceOrder->recalculateTotals();
@@ -389,11 +422,21 @@ class ServiceOrderController extends Controller
 
         $serviceOrder->recalculateTotals();
 
+        $serviceOrder->addLog(
+            'service_added',
+            "Serviço adicionado: {$validated['description']} — Qtd: {$quantity} × R$ " . number_format($unitPrice, 2, ',', '.')
+        );
+
         return back()->with('success', 'Serviço / Mão de Obra adicionado à OS!');
     }
 
     public function removeService(ServiceOrder $serviceOrder, ServiceOrderService $service)
     {
+        $serviceOrder->addLog(
+            'service_removed',
+            "Serviço removido: {$service->description} — R$ " . number_format($service->total_amount, 2, ',', '.')
+        );
+
         $service->delete();
         $serviceOrder->recalculateTotals();
 
@@ -403,6 +446,14 @@ class ServiceOrderController extends Controller
     public function approveBudget(ServiceOrder $serviceOrder)
     {
         $serviceOrder->update(['status' => 'in_progress']);
+
+        $serviceOrder->addLog(
+            'budget_approved',
+            'Orçamento aprovado pelo cliente. OS entrou em execução.',
+            'Orçamento',
+            'Em Execução'
+        );
+
         return back()->with('success', 'Orçamento aprovado pelo cliente! A OS entrou em execução.');
     }
 

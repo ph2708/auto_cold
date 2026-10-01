@@ -14,10 +14,10 @@ class DashboardController extends Controller
     public function index()
     {
         // 1. Estatísticas Gerais de Estoque & Peças
-        $totalProducts = Product::count();
-        $totalSuppliers = Supplier::count();
-        $totalStockUnits = Product::sum('current_stock');
-        $totalStockValue = Product::selectRaw('SUM(current_stock * cost_price) as total_val')->value('total_val') ?? 0;
+        $totalProducts    = Product::count();
+        $totalSuppliers   = Supplier::count();
+        $totalStockUnits  = Product::sum('current_stock');
+        $totalStockValue  = Product::selectRaw('SUM(current_stock * cost_price) as total_val')->value('total_val') ?? 0;
 
         // Peças com Estoque Baixo / Crítico
         $lowStockProducts = Product::with('category')
@@ -27,48 +27,41 @@ class DashboardController extends Controller
             ->get();
 
         $outOfStockCount = Product::where('current_stock', '<=', 0)->count();
-        $lowStockCount = $lowStockProducts->count();
+        $lowStockCount   = $lowStockProducts->count();
 
-        // 2. Gastos e Financeiro da Oficina (Mês Atual e Geral)
-        // Gastos com compras e reposição de estoque no mês
+        // 2. Financeiro — usando DB::sum() em vez de carregar coleções em memória
         $monthStockPurchases = StockMovement::where('type', 'in')
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('total_amount');
 
-        // Gastos com encomendas externas de peças (Mercado Livre, Web, etc.) no mês
         $monthPurchaseOrdersExpense = PurchaseOrder::whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('total_cost');
 
-        // Total de Gastos do Mês (Estoque + Pedidos Web)
         $totalMonthExpenses = $monthStockPurchases + $monthPurchaseOrdersExpense;
 
-        // Faturamento com Serviços e Peças Vendidas nas OSs Concluídas/Entregues (Já Realizado)
-        $finishedOrders = ServiceOrder::with(['items', 'services'])
-            ->whereIn('status', ['completed', 'delivered'])
-            ->get();
+        // Faturamento OSs concluídas — aggregate via DB (sem carregar coleção em memória)
+        $finishedStatuses = ['completed', 'delivered'];
 
-        $totalRevenue = $finishedOrders->sum('total_amount');
-        $totalLaborRevenue = $finishedOrders->sum('services_total');
-        $totalPartsRevenue = $finishedOrders->sum('products_total');
-        $totalPartsCostInOrders = $finishedOrders->sum(function ($order) {
-            return $order->items->sum(function ($item) {
-                return $item->unit_cost * $item->quantity;
-            });
-        });
-        
-        // Lucro Líquido Real da Oficina = Faturamento - Custo das Peças Aplicadas
+        $totalRevenue      = ServiceOrder::whereIn('status', $finishedStatuses)->sum('total_amount');
+        $totalLaborRevenue = ServiceOrder::whereIn('status', $finishedStatuses)->sum('services_total');
+        $totalPartsRevenue = ServiceOrder::whereIn('status', $finishedStatuses)->sum('products_total');
+
+        // Custo real das peças nas OSs finalizadas (via join — sem N+1)
+        $totalPartsCostInOrders = DB::table('service_order_items')
+            ->join('service_orders', 'service_orders.id', '=', 'service_order_items.service_order_id')
+            ->whereIn('service_orders.status', $finishedStatuses)
+            ->selectRaw('SUM(service_order_items.unit_cost * service_order_items.quantity) as total')
+            ->value('total') ?? 0;
+
         $totalNetProfit = $totalRevenue - $totalPartsCostInOrders;
 
-        // Contas "A Receber" (Carros na Oficina em Execução / Aprovados)
-        $pendingOrders = ServiceOrder::with(['items', 'services'])
-            ->whereIn('status', ['approved', 'in_progress', 'waiting_parts'])
-            ->get();
-
-        $totalReceivable = $pendingOrders->sum('total_amount');
-        $totalReceivableLabor = $pendingOrders->sum('services_total');
-        $totalReceivableParts = $pendingOrders->sum('products_total');
+        // Contas "A Receber" — aggregate via DB
+        $pendingStatuses     = ['approved', 'in_progress', 'waiting_parts'];
+        $totalReceivable      = ServiceOrder::whereIn('status', $pendingStatuses)->sum('total_amount');
+        $totalReceivableLabor = ServiceOrder::whereIn('status', $pendingStatuses)->sum('services_total');
+        $totalReceivableParts = ServiceOrder::whereIn('status', $pendingStatuses)->sum('products_total');
 
         // 3. Últimas Movimentações (Entradas e Saídas)
         $recentMovements = StockMovement::with(['product', 'user', 'supplier'])
@@ -76,23 +69,42 @@ class DashboardController extends Controller
             ->take(6)
             ->get();
 
-        // Totais de Entradas e Saídas do Mês Atual
-        $monthMovements = StockMovement::whereMonth('created_at', now()->month)
+        // Totais de Entradas e Saídas do Mês Atual — com DB (não coleção)
+        $monthInAmount  = StockMovement::where('type', 'in')
+            ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
-            ->get();
+            ->sum('total_amount');
 
-        $monthInAmount = $monthMovements->where('type', 'in')->sum('total_amount');
-        $monthOutAmount = $monthMovements->where('type', 'out')->sum('total_amount');
+        $monthOutAmount = StockMovement::where('type', 'out')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('total_amount');
 
         // 4. Métricas de Ordens de Serviço (OS)
-        $activeOsCount = ServiceOrder::whereNotIn('status', ['delivered', 'cancelled'])->count();
+        $activeOsCount       = ServiceOrder::whereNotIn('status', ['delivered', 'cancelled'])->count();
         $waitingPartsOsCount = ServiceOrder::where('status', 'waiting_parts')->count();
 
-        // 5. Métricas de Encomendas / Peças a Chegar (ML / Web)
-        $incomingOrdersCount = PurchaseOrder::whereIn('status', ['pending', 'shipped'])->count();
-        $incomingOrders = PurchaseOrder::whereIn('status', ['pending', 'shipped'])->take(5)->get();
+        // OSs paradas há mais de 3 dias sem movimentação (alerta)
+        $stalledOs = ServiceOrder::whereIn('status', ['in_progress', 'approved'])
+            ->where('updated_at', '<', now()->subDays(3))
+            ->with(['vehicle', 'technician'])
+            ->take(5)
+            ->get();
 
-        // 6. Últimos Gastos / Compras Registradas para visualização detalhada
+        // 5. Métricas de Encomendas / Peças a Chegar
+        $incomingOrdersCount = PurchaseOrder::whereIn('status', ['pending', 'shipped'])->count();
+        $incomingOrders      = PurchaseOrder::whereIn('status', ['pending', 'shipped'])
+            ->with(['serviceOrder.vehicle'])
+            ->take(5)
+            ->get();
+
+        // Pedidos de compra atrasados (passou a data prevista e ainda não chegou)
+        $overdueOrders = PurchaseOrder::whereIn('status', ['pending', 'shipped'])
+            ->whereNotNull('expected_delivery_date')
+            ->where('expected_delivery_date', '<', now()->toDateString())
+            ->count();
+
+        // 6. Últimos Gastos / Compras para visualização
         $recentExpenses = PurchaseOrder::with(['serviceOrder.vehicle', 'user'])
             ->latest()
             ->take(5)
@@ -124,7 +136,9 @@ class DashboardController extends Controller
             'totalReceivable',
             'totalReceivableLabor',
             'totalReceivableParts',
-            'recentExpenses'
+            'recentExpenses',
+            'stalledOs',
+            'overdueOrders'
         ));
     }
 }

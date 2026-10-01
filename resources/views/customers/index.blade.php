@@ -7,79 +7,79 @@
 <div class="space-y-6">
 
     <!-- Barra de Filtros & Ações -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-800 p-4 rounded-2xl shadow-xs">
         <form action="{{ route('customers.index') }}" method="GET" class="flex flex-wrap items-center gap-3 w-full sm:w-auto flex-1">
             <div class="relative flex-1 min-w-[260px]">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                     <i class="fa-solid fa-magnifying-glass text-xs"></i>
                 </span>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Nome, Placa do Carro, Telefone, CPF..."
-                    class="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500">
+                    class="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500 transition">
             </div>
 
-            <button type="submit" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-4 py-2 rounded-xl transition">
+            <button type="submit" class="bg-slate-800 hover:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition">
                 Buscar
             </button>
             @if(request()->has('search'))
-                <a href="{{ route('customers.index') }}" class="text-xs text-slate-400 hover:text-white">Limpar</a>
+                <a href="{{ route('customers.index') }}" class="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-white">Limpar</a>
             @endif
         </form>
 
         <div class="flex items-center gap-2">
             <form action="{{ route('customers.generic') }}" method="POST">
                 @csrf
-                <button type="submit" class="bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-700 flex items-center gap-1.5 transition shrink-0" title="Atendimento rápido sem preencher dados">
+                <button type="submit" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-cyan-700 dark:text-cyan-300 text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition shrink-0" title="Atendimento rápido sem burocracia">
                     <i class="fa-solid fa-user-clock"></i> Cliente Avulso
                 </button>
             </form>
-            <a href="{{ route('customers.create') }}" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-cyan-500/20 flex items-center gap-2 transition shrink-0">
+            <a href="{{ route('customers.create') }}" class="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs shadow-cyan-600/20 flex items-center gap-2 transition shrink-0">
                 <i class="fa-solid fa-user-plus"></i> Novo Cliente
             </a>
         </div>
     </div>
 
     <!-- Tabela de Clientes -->
-    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+    <div class="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
                 <thead>
-                    <tr class="border-b border-slate-800 bg-slate-950/40 text-slate-400 uppercase text-[10px] tracking-wider">
-                        <th class="py-3.5 px-4">Cliente / Contato</th>
-                        <th class="py-3.5 px-4">Veículo(s) Cadastrado(s)</th>
-                        <th class="py-3.5 px-4">Telefone / WhatsApp</th>
-                        <th class="py-3.5 px-4">Cidade / UF</th>
-                        <th class="py-3.5 px-4 text-center">Histórico OS</th>
-                        <th class="py-3.5 px-4 text-right">Ações</th>
+                    <tr class="border-b border-slate-100 dark:border-slate-800 bg-slate-50/75 dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-wider">
+                        <th class="py-3 px-4">Cliente / Contato</th>
+                        <th class="py-3 px-4">Veículo(s) Cadastrado(s)</th>
+                        <th class="py-3 px-4">Telefone / WhatsApp</th>
+                        <th class="py-3 px-4">Cidade / UF</th>
+                        <th class="py-3 px-4 text-center">Histórico OS</th>
+                        <th class="py-3 px-4 text-right">Ações</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/60">
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
                     @forelse($customers as $c)
-                        <tr class="hover:bg-slate-800/30 transition">
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition">
                             <td class="py-3.5 px-4">
-                                <span class="font-bold text-slate-200 block text-sm">{{ $c->name }}</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-200 block text-sm">{{ $c->name }}</span>
                                 @if($c->document_number)
-                                    <span class="text-[10px] text-slate-500 font-mono">Doc: {{ $c->document_number }}</span>
+                                    <span class="text-[10px] text-slate-400 font-mono">Doc: {{ $c->document_number }}</span>
                                 @endif
                             </td>
 
                             <td class="py-3.5 px-4">
                                 <div class="flex flex-wrap gap-1.5">
                                     @forelse($c->vehicles as $v)
-                                        <span class="px-2 py-0.5 rounded bg-slate-950 border border-slate-700 text-cyan-400 font-mono font-bold text-[11px]">
+                                        <span class="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-cyan-700 dark:text-cyan-400 font-mono font-bold text-[11px]">
                                             <i class="fa-solid fa-car text-[9px] mr-1 text-slate-400"></i>
                                             {{ $v->plate }} ({{ $v->model }})
                                         </span>
                                     @empty
-                                        <span class="text-slate-500 italic text-[11px]">Nenhum veículo cadastrado</span>
+                                        <span class="text-slate-400 italic text-[11px]">Nenhum veículo</span>
                                     @endforelse
                                 </div>
                             </td>
 
                             <td class="py-3.5 px-4">
                                 @if($c->phone)
-                                     <div class="text-slate-300">
-                                         <a href="tel:{{ preg_replace('/\D/', '', $c->phone) }}" class="hover:text-cyan-400 transition" title="Ligar">
-                                             <i class="fa-solid fa-phone text-[10px] mr-1 text-slate-500"></i>{{ $c->phone }}
+                                     <div class="text-slate-600 dark:text-slate-300">
+                                         <a href="tel:{{ preg_replace('/\D/', '', $c->phone) }}" class="hover:text-cyan-600 dark:hover:text-cyan-400 transition" title="Ligar">
+                                             <i class="fa-solid fa-phone text-[10px] mr-1 text-slate-400"></i>{{ $c->phone }}
                                          </a>
                                      </div>
                                  @endif
@@ -90,7 +90,7 @@
                                      @endphp
                                      <div class="mt-0.5">
                                          <a href="https://wa.me/{{ $cleanZap }}?text=Ol%C3%A1+{{ urlencode($c->name) }}%2C+tudo+bem%3F+Aqui+%C3%A9+da+oficina+Auto+Cold." target="_blank"
-                                             class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-bold bg-emerald-950/60 hover:bg-emerald-900/80 px-2 py-0.5 rounded-lg border border-emerald-800 transition text-[11px]" title="Abrir conversa no WhatsApp">
+                                             class="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-bold bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 px-2 py-0.5 rounded-lg border border-emerald-200 dark:border-emerald-800 transition text-[11px]" title="Abrir conversa no WhatsApp">
                                              <i class="fa-brands fa-whatsapp text-xs"></i>
                                              <span>{{ $c->whatsapp }}</span>
                                          </a>
@@ -98,22 +98,25 @@
                                  @endif
                             </td>
 
-                            <td class="py-3.5 px-4 text-slate-300">
+                            <td class="py-3.5 px-4 text-slate-600 dark:text-slate-300">
                                 {{ $c->city ?? '-' }} / {{ $c->state ?? '-' }}
                             </td>
 
                             <td class="py-3.5 px-4 text-center">
-                                <span class="inline-block px-2.5 py-1 rounded-full bg-cyan-950/80 text-cyan-300 font-semibold text-[11px] border border-cyan-800/50">
+                                <a href="{{ route('customers.show', $c) }}" class="inline-block px-2.5 py-1 rounded-full bg-cyan-50 dark:bg-cyan-950/80 text-cyan-700 dark:text-cyan-300 font-semibold text-[11px] border border-cyan-200 dark:border-cyan-800/50 hover:bg-cyan-100 dark:hover:bg-cyan-900 transition">
                                     {{ $c->service_orders_count }} OS
-                                </span>
+                                </a>
                             </td>
 
                             <td class="py-3.5 px-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
-                                    <a href="{{ route('service_orders.create') }}?customer_id={{ $c->id }}" class="p-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 text-cyan-400 border border-cyan-800 transition" title="Abrir Nova OS">
+                                    <a href="{{ route('customers.show', $c) }}" class="p-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-950/80 dark:hover:bg-blue-900 dark:text-blue-400 dark:border-blue-800 transition" title="Ver Perfil do Cliente">
+                                        <i class="fa-solid fa-user"></i>
+                                    </a>
+                                    <a href="{{ route('service_orders.create') }}?customer_id={{ $c->id }}" class="p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200 dark:bg-cyan-950/80 dark:hover:bg-cyan-900 dark:text-cyan-400 dark:border-cyan-800 transition" title="Abrir Nova OS">
                                         <i class="fa-solid fa-file-circle-plus"></i>
                                     </a>
-                                    <a href="{{ route('customers.edit', $c) }}" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition" title="Editar / Adicionar Veículo">
+                                    <a href="{{ route('customers.edit', $c) }}" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 transition" title="Editar / Adicionar Veículo">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </a>
                                 </div>
@@ -121,7 +124,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-8 text-center text-slate-500">
+                            <td colspan="6" class="py-8 text-center text-slate-400 dark:text-slate-500">
                                 <i class="fa-solid fa-users text-2xl block mb-2"></i>
                                 Nenhum cliente encontrado.
                             </td>
@@ -132,7 +135,7 @@
         </div>
 
         @if($customers->hasPages())
-            <div class="p-4 border-t border-slate-800">
+            <div class="p-4 border-t border-slate-100 dark:border-slate-800">
                 {{ $customers->links() }}
             </div>
         @endif
@@ -140,3 +143,4 @@
 
 </div>
 @endsection
+

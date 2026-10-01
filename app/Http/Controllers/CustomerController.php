@@ -150,6 +150,20 @@ class CustomerController extends Controller
         return view('customers.edit', compact('customer'));
     }
 
+    public function show(Customer $customer)
+    {
+        $customer->load([
+            'vehicles',
+            'serviceOrders' => fn ($q) => $q->with(['vehicle', 'technician'])->latest(),
+        ]);
+
+        $totalSpent   = $customer->serviceOrders->whereIn('status', ['completed', 'delivered'])->sum('total_amount');
+        $totalOs      = $customer->serviceOrders->count();
+        $lastVisit    = $customer->serviceOrders->first()?->created_at;
+
+        return view('customers.show', compact('customer', 'totalSpent', 'totalOs', 'lastVisit'));
+    }
+
     public function update(Request $request, Customer $customer)
     {
         $validated = $request->validate([
